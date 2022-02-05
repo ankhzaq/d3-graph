@@ -521,6 +521,40 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
     zoom = d3.zoom().on('zoom', handleZoom);
 
     d3.select('svg').call(zoom).on("dblclick.zoom", null);
+
+    const links = svg
+      .selectAll('line')
+      .data(lines)
+      .enter()
+      .append('line')
+      .attr('class', 'arrow')
+      .attr('stroke', 'black')
+      .attr('opacity', '0.5')
+      .attr('marker-end', (d) => "url(#arrow)")//attach the arrow from defs
+      .style( "stroke-width", 3 );
+    /*
+        const rectTooltip = svg
+          .selectAll('text')
+          .attr('class', 'tooltip-Zaquiel')
+          .data(nodes)
+          .enter()
+          .append('rect')
+          .attr("width", 200)
+          .attr("height", 20)
+          .style("visibility", "hidden")
+          .text("I'm a tooltip!")
+          .style("fill", "purple");*/
+
+
+
+    const rectText = svg
+      .selectAll('rect')
+      .data(nodes)
+      .enter()
+      .append('rect')
+      .attr("height", 20)
+      .style("fill", "white");
+
     const text = svg
       .selectAll('text')
       .data(nodes)
@@ -530,8 +564,33 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
       .text(node => node.originalName || node.name || node.id)
       .on("click", (d) => {
         navigator.clipboard.writeText(d.currentTarget.__data__.id);
-      })
-    ;
+      }).on("mouseover", function(d){
+        svg
+          .selectAll(`.tooltipText-${d.currentTarget.__data__.id}`)
+          .attr('visibility', 'visible');
+
+        svg
+          .selectAll('tooltip-area')
+          .attr('visibility', 'visible');
+        // return toolTipText.style("visibility", "hidden");
+      }).on("mouseout", function(d){
+        svg.selectAll(`.tooltipText-${d.currentTarget.__data__.id}`).attr('visibility', 'hidden');
+      });
+
+    const toolTipText = svg
+      .selectAll('toolTipText')
+      .data(nodes)
+      .enter()
+      .append('text')
+      .attr('alignment-baseline', 'middle')
+      .attr('stroke', 'grey')
+      .attr('font-weight', '100')
+      .attr('visibility', 'hidden')
+      .attr('class', node => `tooltipText-${node.id}`)
+      .text(function(d) { return 'line 1'; })
+      .on("click", (d) => {
+        navigator.clipboard.writeText(d.currentTarget.__data__.id);
+      });
 
     const secondText = svg
       .selectAll('secondText')
@@ -558,22 +617,8 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
       .append("svg:path")
       .attr("d", "M0,-5L10,0L0,5");
 
-    const links = svg
-      .selectAll('line')
-      .data(lines)
-      .enter()
-      .append('line')
-      .attr('class', 'arrow')
-      .attr('stroke', 'black')
-      .attr('opacity', '0.5')
-      .attr('marker-end', (d) => "url(#arrow)")//attach the arrow from defs
-      .style( "stroke-width", 3 );
-
     simulation = d3.forceSimulation().nodes(nodes)
-      // .force("charge", d3.forceManyBody().strength(-20))
-      .force("link", d3.forceLink(links))
-    // .force('center', d3.forceCenter(centerX, centerY));
-    ;
+      .force("link", d3.forceLink(links));
 
     dragInteraction = d3.drag().on('drag', (event, node) => {
       node.x = event.x;
@@ -602,7 +647,6 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
       .append('circle')
       .attr('r', WIDTH_ICON / 2)
       .style("fill", "#fff")
-      // .style("fill", "url(#image)")
       .style("fill", (node) => node.image ? `url(#${node.image})` : "url(#image)")
       .on("click", (d) => {
         countClicks += 1;
@@ -618,7 +662,6 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
               showHideNodes = true;
               delete newNodesCollapsedState[nodeId]
               setResetGraph(true)
-              // simulation.restart();
             } else {
               collapseNode(d.target.__data__.id, simulation);
             }
@@ -637,8 +680,10 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
       circles
         .attr('cx', node => node.x)
         .attr('cy', node => node.y);
+      rectText.attr('x', node => node.x + (WIDTH_ICON / 2) + 5).attr('y', node => node.y - 25).attr('width', node => node.originalName.length * 8).attr('class', node => `rect-${node.id}`);
       text
         .attr('x', node => node.x + (WIDTH_ICON / 2) + 5).attr('y', node => node.y - 15);
+      toolTipText.attr('x', node => node.x + (WIDTH_ICON / 2) + 5).attr('y', node => node.y + 20);
       secondText
         .attr('x', node => node.x + (WIDTH_ICON / 2) + 5).attr('y', node => node.y + 10);
       links.attr('x1',link => {
@@ -697,7 +742,7 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
       stateChanged = true;
       setResetGraph(false);
     } else {
-      if (zoom) {
+      if (zoom && state.nodes.length > 0) {
         if (nodeClicked) {
           const { id } = nodeClicked.target.__data__;
           const { x, y } = getPosNode(id);

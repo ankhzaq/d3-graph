@@ -67,8 +67,8 @@ function App() {
       target: 5658,
     }
   ];
-  const [nodes, setNodes] = useState(localNodes);
-  const [links, setLinks] = useState(localLinks);
+  const [nodes, setNodes] = useState(mockupNodes1);
+  const [links, setLinks] = useState(mockupLinks1);
 
   return (
     <Graph
