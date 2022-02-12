@@ -20,7 +20,6 @@ code {
 
 /* Tooltip text */
 .tooltip-area .tooltip-area__text {
-  visibility: hidden;
   width: 120px;
   height: 50px;
   background-color: black;
@@ -35,7 +34,7 @@ code {
 }
 
 /* Show the tooltip text when you mouse over the tooltip container */
-.tooltip-area:hover .tooltip-area__text {
+/*.tooltip-area:hover .tooltip-area__text {
   visibility: visible;
-}
+}*/
 

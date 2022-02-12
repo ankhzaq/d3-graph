@@ -452,9 +452,6 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
       }
     }
     const newNodesToDraw = previousNodes.length === 0 ? newNodes.filter((node) => {
-      /*if (newNodes.length > 20) {
-        return !listMainNodes.includes(node.id);
-      }*/
       return (node.id !== firstNodeMoreLinks.id && node.id !== secondNodeMoreLinks.id);
     }) : newNodes;
 
@@ -532,20 +529,6 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
       .attr('opacity', '0.5')
       .attr('marker-end', (d) => "url(#arrow)")//attach the arrow from defs
       .style( "stroke-width", 3 );
-    /*
-        const rectTooltip = svg
-          .selectAll('text')
-          .attr('class', 'tooltip-Zaquiel')
-          .data(nodes)
-          .enter()
-          .append('rect')
-          .attr("width", 200)
-          .attr("height", 20)
-          .style("visibility", "hidden")
-          .text("I'm a tooltip!")
-          .style("fill", "purple");*/
-
-
 
     const rectText = svg
       .selectAll('rect')
@@ -563,33 +546,14 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
       .attr('alignment-baseline', 'middle')
       .text(node => node.originalName || node.name || node.id)
       .on("click", (d) => {
-        navigator.clipboard.writeText(d.currentTarget.__data__.id);
-      }).on("mouseover", function(d){
-        svg
-          .selectAll(`.tooltipText-${d.currentTarget.__data__.id}`)
-          .attr('visibility', 'visible');
-
-        svg
-          .selectAll('tooltip-area')
-          .attr('visibility', 'visible');
-        // return toolTipText.style("visibility", "hidden");
-      }).on("mouseout", function(d){
-        svg.selectAll(`.tooltipText-${d.currentTarget.__data__.id}`).attr('visibility', 'hidden');
-      });
-
-    const toolTipText = svg
-      .selectAll('toolTipText')
-      .data(nodes)
-      .enter()
-      .append('text')
-      .attr('alignment-baseline', 'middle')
-      .attr('stroke', 'grey')
-      .attr('font-weight', '100')
-      .attr('visibility', 'hidden')
-      .attr('class', node => `tooltipText-${node.id}`)
-      .text(function(d) { return 'line 1'; })
-      .on("click", (d) => {
-        navigator.clipboard.writeText(d.currentTarget.__data__.id);
+        const { id } = d.currentTarget.__data__;
+        navigator.clipboard.writeText(id);
+      }).on("mouseover", function(d) {
+        const { x, y, id } = d.currentTarget.__data__;
+        svg.selectAll(`.tooltip-area__text-${id}`).attr('visibility', 'visible').attr('transform', `translate(${x}, ${y - 150})`);
+      }).on("mouseout", function(d) {
+        const { id } = d.currentTarget.__data__;
+        svg.selectAll(`.tooltip-area__text-${id}`).attr('visibility', 'hidden');
       });
 
     const secondText = svg
@@ -683,7 +647,7 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
       rectText.attr('x', node => node.x + (WIDTH_ICON / 2) + 5).attr('y', node => node.y - 25).attr('width', node => node.originalName.length * 8).attr('class', node => `rect-${node.id}`);
       text
         .attr('x', node => node.x + (WIDTH_ICON / 2) + 5).attr('y', node => node.y - 15);
-      toolTipText.attr('x', node => node.x + (WIDTH_ICON / 2) + 5).attr('y', node => node.y + 20);
+      // toolTipText.attr('x', node => node.x + (WIDTH_ICON / 2) + 5).attr('y', node => node.y + 20);
       secondText
         .attr('x', node => node.x + (WIDTH_ICON / 2) + 5).attr('y', node => node.y + 10);
       links.attr('x1',link => {
@@ -750,16 +714,14 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
             .transition()
             .call(zoom.translateTo, x, y);
         } else {
-          const { x, y } = getPosNode();
-          d3.select('svg')
-            .transition()
-            .call(zoom.translateTo, x, y);
+          d3.select('svg').transition().call(zoom.translateTo, width / 2, height / 3);
         }
       }
     }
     if (showHideNodes) showHideNodes = false;
   }, [resetGraph]);
 
+  const listNodeWithTooltipInfo = state.nodes.filter((node) => node.tooltipInfo);
   return (
     <Layout>
       {showListGraph && (<Sider width={400} className="site-layout-background">
@@ -783,7 +745,27 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
         <Content>
           { !resetGraph && (
             <svg width={width} height={height}>
-              <g></g>
+              <g className={`tooltip-area`}>
+                {listNodeWithTooltipInfo.map((node) => {
+                  const { id, tooltipInfo } = node;
+                  let maxWidth = 0;
+                  const keysTooltip = Object.keys(tooltipInfo);
+                  const heightTooltip = keysTooltip.length * 23;
+                  keysTooltip.forEach((key) => {
+                    const text = tooltipInfo[key];
+                    const widthText = 40 + ((key.length + text.length) * 8.1);
+                    if (widthText > maxWidth) maxWidth = widthText;
+                  })
+                  // let heightTooltip = 5 + (tooltipInfo.length * 20);
+                  return (<foreignObject className={`bar tooltip-area__text tooltip-area__text-${id}`} x={0} y={50} visibility="hidden" style={{ width: maxWidth, height: heightTooltip }}>
+                    {keysTooltip.map((key) => {
+                      const text = tooltipInfo[key];
+                      return (<div style={{ whiteSpace: 'normal',  wordWrap: 'break-word' }} >{key} <b>{text}</b> </div>);
+                    })}
+                  </foreignObject>);
+                })}
+              </g>
+
             </svg>
           )}
         </Content>

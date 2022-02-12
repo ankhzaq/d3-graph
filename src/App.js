@@ -21,13 +21,22 @@ function App() {
       id: 6964,
       image: 'proceso',
       originalName: 'kpfm-es-spk-qlt-reclassificationsparquet-01',
-      secondLabel: 'Dataproc'
+      secondLabel: 'Dataproc',
+      tooltipInfo: {
+        prop1: "prosad",
+        prop2: "p",
+        prop3: "pr"
+      }
     },
     {
       id: 3072,
       image: 'nodo',
       originalName: 't_kqpd_stats',
-      secondLabel: 'HDFS-Parquet | MASTERDATA'
+      secondLabel: 'HDFS-Parquet | MASTERDATA',
+      tooltipInfo: {
+        prop4: "uno, dos, tres, cuatro, cincoas dasdasdasd asdasd asdasdas das final",
+        prop5: "asd",
+      }
     },
     {
       id: 5658,
@@ -37,7 +46,11 @@ function App() {
     {
       id: 1,
       image: 'nodo',
-      originalName: 'nodo1'
+      originalName: 'nodo1',
+      tooltipInfo: {
+        prop6: "property 6",
+        prop7: "property 7",
+      }
     },
     {
       id: 2,
@@ -67,8 +80,8 @@ function App() {
       target: 5658,
     }
   ];
-  const [nodes, setNodes] = useState(mockupNodes1);
-  const [links, setLinks] = useState(mockupLinks1);
+  const [nodes, setNodes] = useState(localNodes);
+  const [links, setLinks] = useState(localLinks);
 
   return (
     <Graph
