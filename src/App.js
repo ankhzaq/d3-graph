@@ -85,7 +85,6 @@ function App() {
 
   return (
     <Graph
-      images={["image", "nodo", "principal", "proceso"]}
       links={links}
       nodes={JSON.parse(JSON.stringify(nodes))}
     />

@@ -32,9 +32,3 @@ code {
   position: absolute;
   z-index: 1;
 }
-
-/* Show the tooltip text when you mouse over the tooltip container */
-/*.tooltip-area:hover .tooltip-area__text {
-  visibility: visible;
-}*/
-

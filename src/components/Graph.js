@@ -185,7 +185,7 @@ function getMenuFromtListGraph(element) {
   return (<Menu.Item key={element.id}>{element.originalName}</Menu.Item>);
 }
 
-function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: nodesProps, onClick, onDoubleClick, showListGraph, width, height }) {
+function Graph({ dateUpdated, links: linksProps, getResetGraph, nodes: nodesProps, onClick, onDoubleClick, showListGraph, width, height }) {
   const [resetGraph, setResetGraph] = useState(false);
   const [state, setState] = useState({ nodes: nodesProps, lines: linksProps, nodesPos: getNodesPos(nodesProps) });
 
@@ -549,11 +549,15 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
         const { id } = d.currentTarget.__data__;
         navigator.clipboard.writeText(id);
       }).on("mouseover", function(d) {
-        const { x, y, id } = d.currentTarget.__data__;
-        svg.selectAll(`.tooltip-area__text-${id}`).attr('visibility', 'visible').attr('transform', `translate(${x}, ${y - 150})`);
+        const { x, y, id, tooltipInfo } = d.currentTarget.__data__;
+        if (tooltipInfo) {
+          svg.select(`.tooltip-area__text-${id}`).attr('visibility', 'visible').attr('transform', `translate(${x}, ${y - 200})`);
+        }
       }).on("mouseout", function(d) {
-        const { id } = d.currentTarget.__data__;
-        svg.selectAll(`.tooltip-area__text-${id}`).attr('visibility', 'hidden');
+        const { id, tooltipInfo } = d.currentTarget.__data__;
+        if (tooltipInfo) {
+          svg.select(`.tooltip-area__text-${id}`).attr('visibility', 'hidden');
+        }
       });
 
     const secondText = svg
@@ -592,6 +596,12 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
     });
 
     var defs = svg.append("svg:defs");
+
+    const images = [];
+    nodes.forEach((node) => {
+      const { image } = node;
+      if(!images.includes(image)) images.push(image);
+    })
 
     images.forEach((image) => {
       defs.append('svg:pattern')
@@ -760,7 +770,7 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
                   return (<foreignObject className={`bar tooltip-area__text tooltip-area__text-${id}`} x={0} y={50} visibility="hidden" style={{ width: maxWidth, height: heightTooltip }}>
                     {keysTooltip.map((key) => {
                       const text = tooltipInfo[key];
-                      return (<div style={{ whiteSpace: 'normal',  wordWrap: 'break-word' }} >{key} <b>{text}</b> </div>);
+                      return (<div style={{ whiteSpace: 'normal',  wordWrap: 'break-word' }} >{key}:  <b>{text}</b> </div>);
                     })}
                   </foreignObject>);
                 })}
@@ -778,7 +788,6 @@ function Graph({ dateUpdated, links: linksProps, getResetGraph, images, nodes: n
 
 Graph.propTypes = {
   dateUpdated: propTypes.number,
-  images: propTypes.array,
   getResetGraph: propTypes.func,
   links: propTypes.array.isRequired,
   nodes: propTypes.array.isRequired,
@@ -791,7 +800,6 @@ Graph.propTypes = {
 
 Graph.defaultProps = {
   dateUpdated: new Date().getTime(),
-  images: [],
   getResetGraph: () => {},
   nodes: nodes_init,
   links: lines_init,
