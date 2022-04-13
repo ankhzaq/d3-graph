@@ -1,7 +1,11 @@
 {
-  "name": "graph",
-  "version": "0.1.0",
-  "private": true,
+  "author": "Zaquiel Rodriguez Arce (zaquielverse) <zaquielverse@gmail.com>",
+  "description": "Zaquielverse package to render a graph made with d3",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "name": "zaquielverse-d3-graph",
+  "private": false,
+  "version": "0.1.6",
   "dependencies": {
     "@babel/core": "^7.16.0",
     "@babel/preset-env": "^7.16.4",
@@ -19,11 +23,12 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
-    "web-vitals": "^1.0.1"
+    "web-vitals": "^1.0.1",
+    "webpack-cli": "^4.9.2"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "webpack",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
